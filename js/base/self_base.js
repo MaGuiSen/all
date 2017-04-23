@@ -1,3 +1,23 @@
+var browser = {
+    versions: function() {
+        var u = navigator.userAgent,
+            app = navigator.appVersion;
+        return {
+            mobile: !!u.match(/AppleWebKit.*Mobile.*/),
+            ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/),
+            android: u.indexOf("Android") > -1 || u.indexOf("Linux") > -1,
+            iPhone: u.indexOf("iPhone") > -1,
+            iPad: u.indexOf("iPad") > -1
+        };
+    } (),
+    language: (navigator.browserLanguage || navigator.language).toLowerCase()
+};
+
+function isApp(){
+    var u = navigator.userAgent;
+    return !!u.match(/AppleWebKit.*Mobile.*/);
+}
+
 function setCookie(key,val,time){//设置cookie方法
     var date=new Date(); //获取当前时间
     var expiresDays=time;  //将date设置为n天以后的时间
