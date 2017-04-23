@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name='viewport' content='width=device-width, user-scalable=no, initial-scale=1.0'>
+    <link rel='stylesheet' href='../../css/base/self_base.css'>
+    <!-- Link Swiper's CSS -->
+    <link rel="stylesheet" href="../../css/base/swiper.min.css">
+    <script src="../../js/bmob/bmob-min.js"></script>
+    <script type="text/javascript" src="../../js/base/self_base.js"></script>
+    <script type='text/javascript' src='../../js/base/jqeury.min.js'></script>
+    <!-- Swiper JS -->
+    <script type='text/javascript' src="../../js/base/swiper.min.js"></script>
+    <script>
+        Bmob.initialize("4027b17630d38454e270abb32aef87f6", "a9f1b520374646d099aca9d849ea7125");
+    </script>
+    <style>
+        body{
+            background: url("../../image/laugh/laugh_bg.png");
+        }
+        .headLayOut{
+            width:100%;
+            height:50px;
+            background-color: #2aa4cf;
+            z-index:1000;
+            box-shadow: 0 0 10px #e0e0e0;
+        }
+        .headLayMain{
+            width: 100%;
+            max-width:1142px;
+            min-width:335px;
+            height:100%;
+            background-color: yellow;
+            word-break: break-all;
+            margin: 0 auto;
+        }
+
+        .contentLayOut{
+            width: 100%;
+            max-width:1142px;
+            min-width:335px;
+            height:100%;
+            word-break: break-all;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: row;
+        }
+        .contentLayLeft{
+            width: 0px;
+            background-color: black;
+        }
+        .contentLayRight{
+            /*width: 330px;*/
+            background-color: blue;
+        }
+        .contentLayCenter{
+            flex: 1;
+            height:400px;
+            position: relative;
+        }
+        .contentMainLay{
+            padding: 30px;
+            border: 1px solid #c2c1bf;
+            background-color: #fff;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px 0px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin: 20px;
+            min-height: 400px;
+        }
+        .preButton{
+            position: absolute;
+            top:50%;/*js计算*/
+            left: 0px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            background-color: #dbdada;
+            border-radius: 25px;
+            justify-content: center;
+            align-items: center;
+            padding-right: 4px;
+            cursor: pointer;
+        }
+        .preButton:hover{
+            background-color: yellowgreen;
+        }
+        .preButtonImg{
+            height: 15px;
+            width: 15px;
+        }
+        .nextButton{
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top:50%;/*js计算*/
+            right: 0px;
+            width: 40px;
+            height: 40px;
+            background-color: #dbdada;
+            border-radius: 25px;
+            padding-left: 4px;
+            cursor: pointer;
+        }
+        .nextButton:hover{
+            background-color: yellowgreen;
+        }
+        .nextButtonImg{
+            height: 15px;
+            width: 15px;
+        }
+        .title{
+            font-size: 1.3rem;
+            color: #2a2a2a;
+            font-weight: normal;
+        }
+        .type{
+            margin: 8px 0;
+        }
+        .type a{
+            color: #2693ba;
+            outline: none;
+            text-decoration: none;
+        }
+        .contentImgOut{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            background: #f4f4f3;
+        }
+        .contentImg{
+            width: 80%;
+        }
+        .contentTxt{
+            font-size: 1.2rem;
+            line-height: 2rem;
+            text-indent:2em;
+        }
+        .contentGifOut{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            background: #f4f4f3;
+        }
+        .contentGifImg{
+            width: 80%;
+            margin: auto;
+            display: block;
+        }
+        .contentGifStatusBtnOut{
+            position: absolute;
+            z-index: 1001;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            height: 50px;
+            width: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-left: 4px;
+            cursor: pointer;
+        }
+        .contentGifStatusBtnOut:hover{
+            background: rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="headLayOut">
+        <div class="headLayMain"></div>
+    </div>
+    <div class="contentLayOut">
+        <div class="contentLayLeft">
+
+        </div>
+        <div class="contentLayCenter">
+            <div class="contentMainLay">
+            </div>
+            <div class="preButton" title="上一张"><img class="preButtonImg" src="../../image/base/icon_triangle_left.png"></div>
+            <div class="nextButton" title="下一张"><img class="nextButtonImg"  src="../../image/base/icon_triangle_right.png"></div>
+        </div>
+        <div class="contentLayRight">
+
+        </div>
+    </div>
+</body>
+<script>
+    var sh=$(window).height();//可视范围的宽度
+    var sw=$(window).width();//可视范围的高度
+    var currList = [];//当前列表
+    var currIndex = 0;
+    var nextRequesting = false;
+    var selfRequesting = false;
+    var perRequestLength = 20;
+    var $j = jQuery.noConflict();
+    var preButton = $j('.preButton');
+    var nextButton = $j('.nextButton');
+    var contentMainLay = $j('.contentMainLay');
+
+    function init(){
+        preButton.hide();
+        nextButton.hide();
+        preButton.css('top', sh/3);
+        nextButton.css('top', sh/3);
+        //隐藏左右加载按钮，设置点击事件
+        preButton.click(function () {
+            preRequest();
+        });
+        nextButton.click(function () {
+            nextRequest();
+        });
+    }
+
+    //第一次进来先加载，显示加载圈，加载10条
+    function firstRequest() {
+        //显示加载圈
+        showLoading(true);
+        startRequest("GIF", function (datas) {
+            currList = mergeArray(currList, datas);
+            showLoading(false);
+            //刷新界面显示,没数据都走了fail
+            nextButton.show();
+            showIndexItem();
+        }, function (code, msg) {
+            showLoading(false);
+            toast('加载失败');
+            //显示点击刷新
+        });
+    }
+
+    function selfRequest(){
+        if(selfRequesting){
+            return;
+        }
+        selfRequesting = true;
+        startRequest('', function (datas) {
+            currList = mergeArray(currList, datas);
+            selfRequesting = false;
+        }, function (code, msg) {
+            //不做处理
+            selfRequesting = false;
+        });
+    }
+
+    function preRequest(){
+        //往前切换数组，第一张之后隐藏左侧按钮
+        currIndex -= 1;
+        if(currIndex <= 0){
+            currIndex = 0;
+            preButton.hide();
+        }else{
+            preButton.show();
+        }
+        //界面上显示currIndex项
+        showIndexItem();
+    }
+
+    function nextRequest(){
+        //往后切换数组，当到达当前数组的倒数第3张的时候开始selfRequest，当在最后一张点击的时候进行加载，显示加载圈
+        currIndex += 1;
+        if(currList.length - 5 == currIndex){
+           selfRequest();
+        }
+        if(currIndex == currList.length){
+            if(nextRequesting){
+                return;
+            }
+            nextRequesting = true;
+            showLoading(true);
+            startRequest('', function (datas) {
+                currList = mergeArray(currList, datas);
+                showLoading(false);
+                nextRequesting = false;
+                //将界面显示为currIndex项
+                showIndexItem();
+            }, function (code, msg) {
+                //不做处理
+                showLoading(false);
+                nextRequesting = false;
+                currIndex -= 1;
+                toast('暂无数据')
+            });
+        }
+        if(currIndex < currList.length){
+            showIndexItem();
+        }
+    }
+
+    function gifPlayClick() {
+
+    }
+
+    function showIndexItem(){
+        if(currIndex > 0){
+            preButton.show();
+        }
+        //判断类型
+        var currItem = currList[currIndex];
+        var type = currItem.type;
+        var title = currItem.title;
+        var txtContent = '';
+        var imgContent = '';
+        var gifContent = '';
+        if("成人笑话" == type || "囧人糗事" == type || "幽默笑话" == type|| "冷笑话" == type){
+            //文本类型
+            txtContent = `
+                <p class="contentTxt">${currItem.detail}</p>
+            `;
+        }else if("儿童" == type || "漫画" == type || "军事体育" == type || "交通" == type|| "奇闻怪事" == type || "动物" == type){
+            //图片类型
+            imgContent = `
+                <div class="contentImgOut">
+                    <img class="contentImg" src="${currItem.originalUrl}">
+                </div>
+            `;
+        }else if("GIF" == type ){
+            //文本类型
+            gifContent = `
+                <div class="contentGifOut">
+                    <img class="contentGifImg" src="${currItem.originalUrl}">
+                    <div class="contentGifStatusBtnOut" title="点击播放">
+                        <img class="contentGifStatusBtn" src="../../image/base/icon_triangle_right.png">
+                    </div>
+                </div>
+            `;
+        }
+        var html = `
+            <h1 class="title">${title}</h1>
+            <div class="type">时间:&nbsp;${currItem.updatedAt} &nbsp;&nbsp;类型:&nbsp;<a href="#" onclick="javascript:;">${currItem.type}</a></div>
+            ${txtContent}
+            ${imgContent}
+            ${gifContent}
+        `;
+        contentMainLay.html(html);
+    }
+    
+    function startRequest(type, success, fail) {
+        type = type || '';
+        var total = getCookie("total_"+type);//{num:10,timestamp:1280977330748}
+        if(!total || total == '0'){
+            //进行total请求
+            console.warn(type+":进行total请求");
+            var ex_params = type ? {type} : {};
+            Bmob.Cloud.run('getTotal', {ex_params}, {
+                success: function(result) {
+                    result = JSON.parse(result);
+                    if(result && result.code == 200){
+                        total = result.data || 0;
+                        setCookie("total_"+type,total,1);
+                        //进行请求
+                    }else{
+                        total = 0;
+                    }
+                    console.warn(type+":"+total);
+                    getRandomTextImg(type, total, success, fail);
+                },
+                error: function(error) {
+                    total = 0;
+                    getRandomTextImg(type, total, success, fail);
+                }
+            })
+        }else{
+            console.warn(type+":"+total);
+            getRandomTextImg(type, total, success, fail);
+        }
+    }
+
+    function getRandomTextImg(type, total, success, fail) {
+        if(!total){
+            //提示没有数据
+            console.warn("没有数据")
+            fail(-100, '没有数据');
+            return;
+        }
+        //防止超出
+        total = total - perRequestLength;
+        var ex_params = type ? {type} : {};
+        Bmob.Cloud.run('getRandomImgTxtModel', {size:perRequestLength,total,ex_params}, {
+            success: function(result) {
+                result = JSON.parse(result);
+                if(result && result.code == 200 && result.data && result.data.length){
+                    //保存成功的的
+                    console.warn(result.data)
+                    success(result.data);
+                }else{
+                    total = 0;
+                    //直接提示无数据
+                    console.warn("无数据")
+                    fail(-100, '没有数据');
+                }
+            },
+            error: function(error) {
+                //直接提示请求失败
+                console.warn("请求失败")
+                fail(-100, '没有数据');
+            }
+        })
+    }
+    //程序开始
+    init();
+    firstRequest();
+</script>
+</html>
