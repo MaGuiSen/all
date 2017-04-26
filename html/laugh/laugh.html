@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>笑料百出</title>
     <meta name='viewport' content='width=device-width, user-scalable=no, initial-scale=1.0'>
+	<link href="../../image/laugh/icon_logo_ico.ico" rel="shortcut icon">
     <link rel='stylesheet' href='../../css/base/self_base.css'>
     <!-- Link Swiper's CSS -->
     <link rel="stylesheet" href="../../css/base/swiper.min.css">
@@ -22,9 +23,9 @@
         .headLayOut{
             position: fixed;
             width:100%;
-            height:50px;
+            height:100px;
             top: 0px;
-            background-color: #2aa4cf;
+            background: url('https://newstatic.pengfu.com/static/images/icon-h-line.jpg') repeat-x bottom #2fae85;
             z-index:1000;
             box-shadow: 0 0 10px #e0e0e0;
         }
@@ -33,18 +34,18 @@
             max-width:1142px;
             min-width:335px;
             height:100%;
-            background-color: #2aa4cf;
             word-break: break-all;
             margin: 0 auto;
         }
 
         .logo{
-            font-size: 16px;
+            font-size: 20px;
             color:#fff;
+            margin-top: 10px;
         }
         .logo img{
-            width: 50px;
-            height: 50px;
+            width: 80px;
+            height: 80px;
             vertical-align:middle;
             margin-right: 10px;
         }
@@ -54,7 +55,7 @@
             min-width:335px;
             height:100%;
             word-break: break-all;
-            margin: 40px auto;
+            margin: 100px auto;
             display: flex;
             flex-direction: row;
         }
@@ -87,7 +88,7 @@
             width: 40px;
             height: 40px;
             display: flex;
-            background-color: #dbdada;
+            background-color: rgba(219, 218, 218, 0.8);
             border-radius: 25px;
             justify-content: center;
             align-items: center;
@@ -109,7 +110,7 @@
             right: 0px;
             width: 40px;
             height: 40px;
-            background-color: #dbdada;
+            background-color: rgba(219, 218, 218, 0.8);
             border-radius: 25px;
             padding-left: 4px;
             cursor: pointer;
@@ -174,6 +175,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
+        }
+		.contentImgStatusBtnOut{
+            position: absolute;
+            z-index: 1001;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            height: 50px;
+            width: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding-left: 4px;
             cursor: pointer;
         }
@@ -208,7 +221,7 @@
         }
         .erCodeMain{
             position: relative;
-            margin-top: 8px;
+            margin-top: 50px;
             display: block;
             overflow: visible;
         }
@@ -226,12 +239,31 @@
             display: none;
         }
 
+        .headTypeChoiceLay{
+            z-index: 1002;
+            position: absolute;
+            right:100px;
+            top:50px;
+        }
+
+        .headTypeChoiceLay li{
+            float: left;
+            font-size: 18px;
+            color: #ffffff;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+            position: relative;
+            padding: 4px 15px;
+            transition: all 0.1s linear 0.1s;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
     <div class="headLayOut">
         <div class="headLayMain">
-            <div class="logo"><img src="../../image/laugh/icon_logo.png"><span>剧有才</span></div>
+            <div class="logo"><img src="../../image/laugh/icon_logo.png"><span>超搞笑</span></div>
+            <ul class="headTypeChoiceLay clearfix"><li onclick="liTypeClick('', -1)">全部</li><li onclick="liTypeClick('img', -1)">趣味图</li><li onclick="liTypeClick('txt', -1)">神段子</li></ul>
         </div>
     </div>
     <div class="operateLay">
@@ -258,6 +290,12 @@
     </div>
 </body>
 <script>
+    /**
+     * 基础参数
+     */
+    var ImageTypes = ["GIF","漫画","军事体育","交通","奇闻怪事","动物","儿童"];//趣图
+    var TxtTypes = ["成人笑话","幽默笑话","囧人糗事","冷笑话"];//段子
+    var currType = [];//当前类型
     var sh=$(window).height();//可视范围的宽度
     var sw=$(window).width();//可视范围的高度
     var currList = [];//当前列表
@@ -272,8 +310,13 @@
     var operateLay = $j('.operateLay');
 
     function init(){
+        currList = [];
+        currIndex = 0;
         preButton.hide();
         nextButton.hide();
+		if(isApp()){
+			operateLay.css('top', sh*2/3);
+		}
         //隐藏左右加载按钮，设置点击事件
         preButton.click(function () {
             preRequest();
@@ -283,11 +326,49 @@
         });
     }
 
+    function liTypeClick(type, index){
+        for(var item in ImageTypes){
+            if(type == ImageTypes[item]){
+                type = 'img';
+                index = item;
+            }
+        }
+        for(var item in TxtTypes){
+            if(type == TxtTypes[item]){
+                type = 'txt';
+                index = item;
+            }
+        }
+        changeType(type, index);
+        init();
+        firstRequest();
+    }
+
+    function changeType(type, index) {
+//        1"GIF",2"漫画",3"军事体育",4"交通",5"奇闻怪事",6"动物",7"儿童"
+//        1"成人笑话",2"幽默笑话",3"囧人糗事",4"冷笑话"
+        if(type == 'img'){
+            if(index == -1){
+                currType = ImageTypes;
+            }else{
+                currType = [ImageTypes[index]];
+            }
+        }else if(type == 'txt'){
+            if(index == -1){
+                currType = TxtTypes;
+            }else{
+                currType = [TxtTypes[index]];
+            }
+        }else{
+            currType = [];
+        }
+    }
+
     //第一次进来先加载，显示加载圈，加载10条
     function firstRequest() {
         //显示加载圈
         showLoading(true);
-        startRequest('', function (datas) {
+        startRequest(currType, function (datas) {
             currList = mergeArray(currList, datas);
             showLoading(false);
             //刷新界面显示,没数据都走了fail
@@ -305,7 +386,7 @@
             return;
         }
         selfRequesting = true;
-        startRequest('', function (datas) {
+        startRequest(currType, function (datas) {
             currList = mergeArray(currList, datas);
             selfRequesting = false;
         }, function (code, msg) {
@@ -339,7 +420,7 @@
             }
             nextRequesting = true;
             showLoading(true);
-            startRequest('', function (datas) {
+            startRequest(currType, function (datas) {
                 currList = mergeArray(currList, datas);
                 showLoading(false);
                 nextRequesting = false;
@@ -379,6 +460,9 @@
             imgContent = `
                 <div class="contentImgOut">
                     <img class="contentImg" src="${currItem.originalUrl}">
+					<div class="contentImgStatusBtnOut">
+                        <img class="contentImgStatusBtn" src="../../image/loading_2.gif">
+                    </div>
                 </div>
             `;
         }else if("GIF" == type ){
@@ -398,18 +482,25 @@
             `
             <div class="erCodeMain">
             扫描到手机：<img class="erCodeSmall" height="32px" width="32px" alt="二维码" src="../../image/base/icon_erweima.png">
-            <img class="erCodeBig" height="140" width="140" alt="二维码" src="../../image/base/icon_erweima.png">
+            <img class="erCodeBig" height="140" width="140" alt="二维码" src="../../image/laugh/icon_ercode_base.png">
             </div>
             `;
         var html = `
             <h1 class="title">${title}</h1>
-            <div class="type">时间:&nbsp;${currItem.updatedAt} &nbsp;&nbsp;类型:&nbsp;<a href="#" onclick="javascript:;">${currItem.type}</a></div>
+            <div class="type">时间:&nbsp;${currItem.updatedAt} &nbsp;&nbsp;类型:&nbsp;<a href="#" onclick="liTypeClick(\'${currItem.type}\', \'-1\')">${currItem.type}</a></div>
             ${txtContent}
             ${imgContent}
             ${gifContent}
             ${erCodeHtml}
         `;
         contentMainLay.html(html);
+		if("儿童" == type || "漫画" == type || "军事体育" == type || "交通" == type|| "奇闻怪事" == type || "动物" == type){
+			var contentImgStatusBtnOut = $j(".contentImgStatusBtnOut");
+            var contentImg = $j(".contentImg");
+			contentImg.load(function(){
+			  contentImgStatusBtnOut.hide();
+			});
+		}
         if("GIF" == type ) {
             //处理图片事件
             var contentGifStatusBtnOut = $j(".contentGifStatusBtnOut");
@@ -452,18 +543,21 @@
     }
     
     function startRequest(type, success, fail) {
-        type = type || '';
-        var total = getCookie("total_"+type);//{num:10,timestamp:1280977330748}
+        type = type || [];
+        var total = getCookie("total_"+type.join("_"));//{num:10,timestamp:1280977330748}
         if(!total || total == '0'){
             //进行total请求
-            console.warn(type+":进行total请求");
-            var ex_params = type ? {type} : {};
+            console.warn(type.join("_")+":进行total请求");
+            var ex_params = {};
+            if(type.length){
+                ex_params = {type:{"$in":type}};
+            }
             Bmob.Cloud.run('getTotal', {ex_params}, {
                 success: function(result) {
                     result = JSON.parse(result);
                     if(result && result.code == 200){
                         total = result.data || 0;
-                        setCookie("total_"+type,total,1);
+                        setCookie("total_"+type.join("_"),total,1);
                         //进行请求
                     }else{
                         total = 0;
@@ -491,7 +585,10 @@
         }
         //防止超出
         total = total - perRequestLength;
-        var ex_params = type ? {type} : {};
+        var ex_params = {};
+        if(type.length){
+            ex_params = {type:{"$in":type}};
+        }
         Bmob.Cloud.run('getRandomImgTxtModel', {size:perRequestLength,total,ex_params}, {
             success: function(result) {
                 result = JSON.parse(result);
@@ -515,6 +612,7 @@
     }
 //    //程序开始
     init();
+    changeType('', -1);
     firstRequest();
 </script>
 </html>
