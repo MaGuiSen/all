@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>锻炼大脑</title>
+    <meta name='viewport' content='width=device-width, user-scalable=no, initial-scale=1.0'>
+    <link href="../../image/laugh/icon_logo_ico.ico" rel="shortcut icon">
+    <link rel='stylesheet' href='../../css/base/self_base.css'>
+    <script src="../../js/bmob/bmob-min.js"></script>
+    <script type="text/javascript" src="../../js/base/self_base.js"></script>
+    <script type='text/javascript' src='../../js/base/jqeury.min.js'></script>
+</head>
+<body>
+<div id="mainLayout" style="position:fixed;top:0;left:0;right:0;bottom:0">
+</div>
+<!---下面将演示一种绘制矩形的demo--->
+<script type="text/javascript">
+    var $j = jQuery.noConflict();
+    var mainLayout = $j("#mainLayout");
+    var topPart = null;
+    var centerPart = null;
+    var bottomPart = null;
+    var baseParams = {};
+
+    //获取圆形的宽带列表
+    function getCircleWList(){
+        var circleWList = [];
+        for(var i=0;i<5;i++){
+            circleWList[i] = baseParams.circleMinW + baseParams.circleMinW * i;
+        }
+        return circleWList
+    }
+
+    //获取颜色列表
+    function getCircleColorList(){
+        return [
+            "red",
+            "yellow",
+            "blue",
+            "black",
+            "green",
+        ];
+    }
+
+    function init() {
+        baseParams.sh = mainLayout.height();
+        baseParams.sw = mainLayout.width();
+        baseParams.circleH = 20;
+        //最小的circle宽度
+        baseParams.circleMinW = 40;
+        //最大的circle宽度
+        baseParams.circleMaxW = baseParams.sw - 100;
+        baseParams.circleMaxNum = 5;//最多几个圆
+        //每个圆形宽度的梯度
+        baseParams.circleWGrads = (baseParams.circleMaxW - baseParams.circleMinW)/ baseParams.circleMaxNum;
+        baseParams.circleWList = getCircleWList();
+        baseParams.circleColorList = getCircleColorList();
+        baseParams.topPartPadding = 20;
+        baseParams.topPartH = baseParams.circleH * 5 + 2*baseParams.topPartPadding;
+        baseParams.bottomPartH = 80;
+        baseParams.centerPartH = baseParams.sh - baseParams.topPartH - baseParams.bottomPartH;
+        //绘制
+        var mainHtml = `
+            <canvas id="topPart" width='${baseParams.sw}px' height='${baseParams.topPartH}px'/>
+            <canvas id="centerPart" width='${baseParams.sw}px' height='${baseParams.centerPartH}px'/>
+            <div id="bottomPart" style="width:${baseParams.sw}px;height:${baseParams.bottomPartH}px;"></div>
+        `;
+        mainLayout.html(mainHtml);
+        topPart = $j("#topPart");
+        centerPart = $j("#centerPart");
+        bottomPart = $j("#bottomPart");
+        centerPart.css("background-color","red");
+        bottomPart.css("background-color","red");
+    }
+
+    init();
+    
+    function getRandomRect() {
+        var rectList = [];
+        for(var i=0;i<5;i++){
+            rectList[i] ={
+              color:baseParams.circleColorList[GetRandomNum(0, 4)],
+              width:baseParams.circleWList[GetRandomNum(0, 4)],
+            };
+        }
+        return rectList;
+    }
+
+    function drawRect() {
+        var canvas = topPart.get(0).getContext('2d');//注意当用jquery的时候这里需要加get(0)
+        canvas.shadowOffsetX = 1; // 阴影Y轴偏移
+        canvas.shadowOffsetY = 1; // 阴影X轴偏移
+        canvas.shadowBlur = 8; // 模糊尺寸
+        canvas.shadowColor = 'rgba(0, 0, 0, 0.5)'; // 颜色
+        var rectList = getRandomRect();
+        for(var i=0;i<rectList.length;i++){
+            canvas.fillStyle = rectList[i].color;
+            var x = baseParams.sw / 2 - rectList[i].width / 2;
+            var y = baseParams.topPartH - baseParams.topPartPadding - i*baseParams.circleH;
+            canvas.fillRect(x,y,rectList[i].width,baseParams.circleH);
+        }
+    }
+    drawRect();
+</script>
+</body>
+</html>
