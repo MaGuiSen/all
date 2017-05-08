@@ -9,16 +9,54 @@
     <script src="../../js/bmob/bmob-min.js"></script>
     <script type="text/javascript" src="../../js/base/self_base.js"></script>
     <script type='text/javascript' src='../../js/base/jqeury.min.js'></script>
+    <style>
+        #topStatusPart{
+            background-color: black;
+        }
+        #topStatusScore{
+            margin-top: 6px;
+            float: right;
+            color: white;
+            font-size: 14pt;
+            margin-right: 20px;
+        }
+        #topStatusTime{
+            margin-top: 6px;
+            float: left;
+            color: white;
+            font-size: 14pt;
+            margin-left: 20px;
+        }
+        #answer_status{
+            display: block;
+            top:40%;
+            left:40%;
+            width: 80px;
+            height: 80px;
+            position: fixed;
+            z-index: 1001;
+        }
+    </style>
 </head>
 <body>
-<bgsound id="sound" src="" loop=1>
+<div id="bg_music"></div>
+<div id="status_music"></div>
 <div id="mainLayout" style="position:fixed;top:0;left:0;right:0;bottom:0">
 </div>
+<img id="answer_status" src="../../image/correct-hd.png">
 <!---下面将演示一种绘制矩形的demo--->
 <script type="text/javascript">
     var $j = jQuery.noConflict();
     var mainLayout = $j("#mainLayout");
+    var bg_music = $j("#bg_music");
+    var status_music = $j("#status_music");
+    var answer_status = $j("#answer_status");
+    answer_status.hide();
     var topPart = null;
+    var topStatusPart = null;
+    var topStatusTime = null;
+    var topStatusScore = null;
+    var progress = null;
     var centerPart = null;
     var bottomPart = null;
     var baseParams = {};
@@ -58,35 +96,99 @@
         baseParams.circleWGrads = (baseParams.circleMaxW - baseParams.circleMinW)/ baseParams.circleMaxNum;
         baseParams.circleWList = getCircleWList();
         baseParams.circleColorList = getCircleColorList();
-        baseParams.topPartPadding = 50;
+        baseParams.topPartPadding = 40;
         baseParams.topPartH = baseParams.circleH * 5 + 2*baseParams.topPartPadding;
-        baseParams.bottomPartH = 60;
-        baseParams.centerPartH = baseParams.sh - baseParams.topPartH - baseParams.bottomPartH;
+        baseParams.bottomPartH = 40;
+        baseParams.topStatusH = 40;
+        baseParams.centerPartH = baseParams.sh - baseParams.topPartH - baseParams.bottomPartH - baseParams.topStatusH;
         //绘制
         var mainHtml = `
+            <div id="topStatusPart" style="width:${baseParams.sw}px;height:${baseParams.topStatusH}px;">
+                <div id="topStatusScore">分数</div><div id="topStatusTime">时间</div>
+                <div id="progress" style='width:${baseParams.sw}px;height:${baseParams.topStatusH}px;'/>
+            </div>
             <canvas id="topPart" width='${baseParams.sw}px' height='${baseParams.topPartH}px'/>
             <canvas id="centerPart" width='${baseParams.sw}px' height='${baseParams.centerPartH}px'/>
-            <div id="bottomPart" style="width:${baseParams.sw}px;height:${baseParams.bottomPartH}px;"></div>
+            <div id="bottomPart" style='width:${baseParams.sw}px;height:${baseParams.bottomPartH}px;'>
+
+            </div>
         `;
         mainLayout.html(mainHtml);
         topPart = $j("#topPart");
         centerPart = $j("#centerPart");
         bottomPart = $j("#bottomPart");
+        topStatusPart = $j("#topStatusPart");
+
+        topStatusTime = $j("#topStatusTime");
+        topStatusScore = $j("#topStatusScore");
+        progress = $j("#progress");
         centerPart.click(function (event) {
             var circleMainAll = baseParams.mainCircles;
             var circleOther1All = baseParams.circleOther1All;
             var circleOther2All = baseParams.circleOther2All;
-            document.all.sound.src="../../sound/tock.mp3";
             if(checkInCircles(event.offsetX, event.offsetY, circleMainAll)){
-               alert("main")
+                answer_status.show();
+                answer_status.attr("src","../../image/correct-hd.png");
+                playStatusSound(true);
+                resetCircles();
             }else if(checkInCircles(event.offsetX, event.offsetY, circleOther1All)){
-                alert("other1")
+                answer_status.show();
+                answer_status.attr("src","../../image/wrong-hd.png");
+                playStatusSound(false);
+                resetCircles();
             }else if(checkInCircles(event.offsetX, event.offsetY, circleOther2All)){
-                alert("other2")
+                answer_status.show();
+                answer_status.attr("src","../../image/wrong-hd.png");
+                playStatusSound(false);
                 resetCircles();
             }
+            setTimeout(function () {
+                answer_status.hide();
+            },250)
         });
     }
+
+    function playStatusSound(correct) {
+        if(correct){
+            //移动端需要使用audio 而不是用embed loop不设置为循环一次
+            status_music.html('<audio src="../../sound/success.mp3" controls autoplay hidden="true"></audio>');
+        }else{
+            status_music.html('<audio src="../../sound/incorrect.mp3" controls autoplay hidden="true"></audio>');
+        }
+    }
+
+
+    //答题时间timeLongs
+    var timeMax = 10;
+    var timeLong = timeMax;
+    //计时开始
+    function timeStart() {
+        var interval = setInterval(function () {
+            console.warn(timeLong);
+            topStatusTime.html("时间 "+(timeLong > 0 ? timeLong : 0));
+            progress.css("width", baseParams.sw - timeLong/timeMax*baseParams.sw);
+            if(timeLong > 5){
+                progress.css("background", "green");
+            }else if(timeLong >= 0 && timeLong <= 5){
+                progress.css("background", "red");
+                //音效的设置
+                if(timeLong == 0){
+                    bg_music.html('<audio src="../../sound/success.mp3" controls autoplay hidden="true"></audio>');
+                }else{
+                    bg_music.html('<embed src="../../sound/tick.mp3" controls autoplay hidden="true"></embed>');
+                }
+
+            }else{
+                progress.css("background", "red");
+                //<0说明结束了
+                bg_music.html('');
+                timeLong = 10;
+                clearInterval(interval);
+            }
+            timeLong -- ;
+        },1000)
+    }
+    timeStart();
 
     function checkInCircles(pointX, pointY, circleAll) {
         var xdiff = circleAll.centerX - pointX;
