@@ -26,7 +26,7 @@
     function getCircleWList(){
         var circleWList = [];
         for(var i=0;i<5;i++){
-            circleWList[i] = baseParams.circleMinW + baseParams.circleMinW * i;
+            circleWList[i] = baseParams.circleMinW + baseParams.circleWGrads * i;
         }
         return circleWList
     }
@@ -45,19 +45,19 @@
     function init() {
         baseParams.sh = mainLayout.height();
         baseParams.sw = mainLayout.width();
-        baseParams.circleH = 20;
+        baseParams.circleH = 25;
         //最小的circle宽度
-        baseParams.circleMinW = 40;
+        baseParams.circleMinW = 20;
         //最大的circle宽度
-        baseParams.circleMaxW = baseParams.sw - 100;
+        baseParams.circleMaxW = baseParams.sw/2 - 20;
         baseParams.circleMaxNum = 5;//最多几个圆
         //每个圆形宽度的梯度
         baseParams.circleWGrads = (baseParams.circleMaxW - baseParams.circleMinW)/ baseParams.circleMaxNum;
         baseParams.circleWList = getCircleWList();
         baseParams.circleColorList = getCircleColorList();
-        baseParams.topPartPadding = 20;
+        baseParams.topPartPadding = 50;
         baseParams.topPartH = baseParams.circleH * 5 + 2*baseParams.topPartPadding;
-        baseParams.bottomPartH = 80;
+        baseParams.bottomPartH = 60;
         baseParams.centerPartH = baseParams.sh - baseParams.topPartH - baseParams.bottomPartH;
         //绘制
         var mainHtml = `
@@ -69,12 +69,32 @@
         topPart = $j("#topPart");
         centerPart = $j("#centerPart");
         bottomPart = $j("#bottomPart");
-        centerPart.css("background-color","red");
-        bottomPart.css("background-color","red");
+        centerPart.click(function (event) {
+            var circleMainAll = baseParams.mainCircles;
+            var circleOther1All = baseParams.circleOther1All;
+            var circleOther2All = baseParams.circleOther2All;
+            if(checkInCircles(event.offsetX, event.offsetY, circleMainAll)){
+                alert("main")
+            }else if(checkInCircles(event.offsetX, event.offsetY, circleOther1All)){
+                alert("circleOther1All")
+            }else if(checkInCircles(event.offsetX, event.offsetY, circleOther2All)){
+                alert("circleOther2All")
+            }
+        });
     }
 
-    init();
-    
+    function checkInCircles(pointX, pointY, circleAll) {
+        var xdiff = circleAll.centerX - pointX;
+        var ydiff = circleAll.centerY - pointY;
+        var distance = Math.pow((xdiff * xdiff + ydiff * ydiff), 0.5);
+        for(var index in circleAll.circles){
+            if(circleAll.circles[index].width/2 >= distance){
+                return true;
+            }
+        }
+        return false;
+    }
+
     function getRandomRect() {
         var rectList = [];
         for(var i=0;i<5;i++){
@@ -93,6 +113,7 @@
         canvas.shadowBlur = 8; // 模糊尺寸
         canvas.shadowColor = 'rgba(0, 0, 0, 0.5)'; // 颜色
         var rectList = getRandomRect();
+        baseParams.rectList = rectList;
         for(var i=0;i<rectList.length;i++){
             canvas.fillStyle = rectList[i].color;
             var x = baseParams.sw / 2 - rectList[i].width / 2;
@@ -100,7 +121,53 @@
             canvas.fillRect(x,y,rectList[i].width,baseParams.circleH);
         }
     }
-    drawRect();
+
+    function drawCircle(x, y, circles){
+        var canvas = centerPart.get(0).getContext('2d');//注意当用jquery的时候这里需要加get(0)
+        canvas.shadowOffsetX = 1; // 阴影Y轴偏移
+        canvas.shadowOffsetY = 1; // 阴影X轴偏移
+        canvas.shadowBlur = 8; // 模糊尺寸
+        canvas.shadowColor = 'rgba(0, 0, 0, 0.5)'; // 颜色
+        for(var index in circles){
+            var circle = circles[index];
+            canvas.fillStyle=circle.color;
+            canvas.beginPath();
+            canvas.arc(x ,y ,circle.width/2 ,0 ,Math.PI*2 ,true);
+            canvas.closePath();
+            canvas.fill();
+        }
+    }
+
+    function drawCircles() {
+        var circleMainAll = {
+            centerX:baseParams.sw/4,
+            centerY:baseParams.centerPartH/4,
+            circles:baseParams.rectList
+        };
+        var circleOther1All = {
+            centerX:3*baseParams.sw/4,
+            centerY:baseParams.centerPartH/4,
+            circles:getRandomRect()
+        };
+        var circleOther2All = {
+            centerX:baseParams.sw/2,
+            centerY:3*baseParams.centerPartH/4,
+            circles:getRandomRect()
+        };
+        baseParams.mainCircles = circleMainAll;
+        baseParams.circleOther1All = circleOther1All;
+        baseParams.circleOther2All = circleOther2All;
+
+        drawCircle(circleMainAll.centerX, circleMainAll.centerY,circleMainAll.circles);
+        drawCircle(circleOther1All.centerX, circleOther1All.centerY,circleOther1All.circles);
+        drawCircle(circleOther2All.centerX, circleOther2All.centerY,circleOther2All.circles);
+    }
+
+    setTimeout(function () {
+        init();
+        drawRect();
+        drawCircles();
+    }, 500)
 </script>
 </body>
 </html>
