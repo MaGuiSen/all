@@ -11,6 +11,7 @@
     <script type='text/javascript' src='../../js/base/jqeury.min.js'></script>
 </head>
 <body>
+<bgsound id="sound" src="" loop=1>
 <div id="mainLayout" style="position:fixed;top:0;left:0;right:0;bottom:0">
 </div>
 <!---下面将演示一种绘制矩形的demo--->
@@ -21,6 +22,8 @@
     var centerPart = null;
     var bottomPart = null;
     var baseParams = {};
+    var topPartConvas = null;
+    var centerPartConvas = null;
 
     //获取圆形的宽带列表
     function getCircleWList(){
@@ -73,12 +76,14 @@
             var circleMainAll = baseParams.mainCircles;
             var circleOther1All = baseParams.circleOther1All;
             var circleOther2All = baseParams.circleOther2All;
+            document.all.sound.src="../../sound/tock.mp3";
             if(checkInCircles(event.offsetX, event.offsetY, circleMainAll)){
-                alert("main")
+               alert("main")
             }else if(checkInCircles(event.offsetX, event.offsetY, circleOther1All)){
-                alert("circleOther1All")
+                alert("other1")
             }else if(checkInCircles(event.offsetX, event.offsetY, circleOther2All)){
-                alert("circleOther2All")
+                alert("other2")
+                resetCircles();
             }
         });
     }
@@ -108,6 +113,7 @@
 
     function drawRect() {
         var canvas = topPart.get(0).getContext('2d');//注意当用jquery的时候这里需要加get(0)
+        topPartConvas = canvas;
         canvas.shadowOffsetX = 1; // 阴影Y轴偏移
         canvas.shadowOffsetY = 1; // 阴影X轴偏移
         canvas.shadowBlur = 8; // 模糊尺寸
@@ -122,8 +128,12 @@
         }
     }
 
-    function drawCircle(x, y, circles){
+    function drawCircle(circleAll){
+        var x = circleAll.centerX;
+        var y = circleAll.centerY;;
+        var circles = circleAll.circles;
         var canvas = centerPart.get(0).getContext('2d');//注意当用jquery的时候这里需要加get(0)
+        centerPartConvas = canvas;
         canvas.shadowOffsetX = 1; // 阴影Y轴偏移
         canvas.shadowOffsetY = 1; // 阴影X轴偏移
         canvas.shadowBlur = 8; // 模糊尺寸
@@ -139,28 +149,47 @@
     }
 
     function drawCircles() {
-        var circleMainAll = {
+        var centers = [{
             centerX:baseParams.sw/4,
             centerY:baseParams.centerPartH/4,
+        }, {
+            centerX:3*baseParams.sw/4,
+            centerY:baseParams.centerPartH/4,
+        }, {
+            centerX:baseParams.sw/2,
+            centerY:3*baseParams.centerPartH/4,
+        }];
+        centers.sort(function(){return Math.random()>0.5?-1:1;})//随机排序
+        var circleMainAll = {
+            centerX:centers[0].centerX,
+            centerY:centers[0].centerY,
             circles:baseParams.rectList
         };
         var circleOther1All = {
-            centerX:3*baseParams.sw/4,
-            centerY:baseParams.centerPartH/4,
+            centerX:centers[1].centerX,
+            centerY:centers[1].centerY,
             circles:getRandomRect()
         };
         var circleOther2All = {
-            centerX:baseParams.sw/2,
-            centerY:3*baseParams.centerPartH/4,
+            centerX:centers[2].centerX,
+            centerY:centers[2].centerY,
             circles:getRandomRect()
         };
         baseParams.mainCircles = circleMainAll;
         baseParams.circleOther1All = circleOther1All;
         baseParams.circleOther2All = circleOther2All;
+        var arr = [circleMainAll, circleOther1All, circleOther2All];
+        for(var index in arr){
+            drawCircle(arr[index]);
+        }
+    }
 
-        drawCircle(circleMainAll.centerX, circleMainAll.centerY,circleMainAll.circles);
-        drawCircle(circleOther1All.centerX, circleOther1All.centerY,circleOther1All.circles);
-        drawCircle(circleOther2All.centerX, circleOther2All.centerY,circleOther2All.circles);
+    function resetCircles() {
+        //清除
+        topPartConvas.clearRect(0, 0, topPartConvas.canvas.width, topPartConvas.canvas.height);
+        centerPartConvas.clearRect(0, 0, centerPartConvas.canvas.width, centerPartConvas.canvas.height);
+        drawRect();
+        drawCircles();
     }
 
     setTimeout(function () {
