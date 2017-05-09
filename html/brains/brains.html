@@ -36,6 +36,17 @@
             position: fixed;
             z-index: 1001;
         }
+        #bottomPart{
+            background-color: #2fae85;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #bottomPartContent{
+            color: white;
+            font-size: 12pt;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
@@ -59,9 +70,11 @@
     var progress = null;
     var centerPart = null;
     var bottomPart = null;
+    var bottomPartContent = null;
     var baseParams = {};
     var topPartConvas = null;
     var centerPartConvas = null;
+    var gameStatus = 'normal';
 
     //获取圆形的宽带列表
     function getCircleWList(){
@@ -110,18 +123,25 @@
             <canvas id="topPart" width='${baseParams.sw}px' height='${baseParams.topPartH}px'/>
             <canvas id="centerPart" width='${baseParams.sw}px' height='${baseParams.centerPartH}px'/>
             <div id="bottomPart" style='width:${baseParams.sw}px;height:${baseParams.bottomPartH}px;'>
-
+                <div id="bottomPartContent"></div>
             </div>
         `;
         mainLayout.html(mainHtml);
         topPart = $j("#topPart");
         centerPart = $j("#centerPart");
         bottomPart = $j("#bottomPart");
+        bottomPartContent = $j("#bottomPartContent");
+        bottomPartContent.html('点击开始游戏');
         topStatusPart = $j("#topStatusPart");
-
         topStatusTime = $j("#topStatusTime");
         topStatusScore = $j("#topStatusScore");
         progress = $j("#progress");
+        bottomPart.click(function () {
+            //点击开始
+            if(gameStatus == 'normal' || gameStatus == 'ending'){
+                timeStart();
+            }
+        });
         centerPart.click(function (event) {
             var circleMainAll = baseParams.mainCircles;
             var circleOther1All = baseParams.circleOther1All;
@@ -163,11 +183,19 @@
     var timeLong = timeMax;
     //计时开始
     function timeStart() {
+        //初始化
+        progress.css('background-color', 'green');
+        progress.css('width', 0);
+        timeLong = timeMax;
+        gameStatus = 'playing';
+        bottomPartContent.html('游戏中');
+        topStatusTime.html("时间 "+timeMax);
         var interval = setInterval(function () {
             console.warn(timeLong);
-            topStatusTime.html("时间 "+(timeLong > 0 ? timeLong : 0));
+            topStatusTime.html((timeLong > 0 ? "时间 "+timeLong : '时间到'));
             progress.css("width", baseParams.sw - timeLong/timeMax*baseParams.sw);
             if(timeLong > 5){
+                status_music.html('<audio src="../../sound/success_partial.mp3" controls autoplay hidden="true"></audio>');
                 progress.css("background", "green");
             }else if(timeLong >= 0 && timeLong <= 5){
                 progress.css("background", "red");
@@ -175,20 +203,20 @@
                 if(timeLong == 0){
                     bg_music.html('<audio src="../../sound/success.mp3" controls autoplay hidden="true"></audio>');
                 }else{
-                    bg_music.html('<embed src="../../sound/tick.mp3" controls autoplay hidden="true"></embed>');
+                    bg_music.html('<audio src="../../sound/tick.mp3" controls autoplay hidden="true"></audio>');
                 }
-
             }else{
                 progress.css("background", "red");
                 //<0说明结束了
                 bg_music.html('');
+                gameStatus = 'ending';
+                bottomPartContent.html('游戏结束,点击重玩');
                 timeLong = 10;
                 clearInterval(interval);
             }
             timeLong -- ;
         },1000)
     }
-    timeStart();
 
     function checkInCircles(pointX, pointY, circleAll) {
         var xdiff = circleAll.centerX - pointX;
