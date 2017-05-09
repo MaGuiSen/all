@@ -75,6 +75,14 @@
     var topPartConvas = null;
     var centerPartConvas = null;
     var gameStatus = 'normal';
+    var gameLevel = 'low';//low 初级 mid中级 dif 困难
+
+
+    //获取圆形的高度列表
+    function getCircleHList(){
+        var circleWList = [1*baseParams.circleH/4 ,1*baseParams.circleH/2 ,3*baseParams.circleH/4 ,baseParams.circleH];
+        return circleWList
+    }
 
     //获取圆形的宽带列表
     function getCircleWList(){
@@ -88,11 +96,13 @@
     //获取颜色列表
     function getCircleColorList(){
         return [
-            "red",
-            "yellow",
-            "blue",
-            "black",
-            "green",
+            "#8F26D9",
+            "#F7812B",
+            "#C91056",
+            "#DAC739",
+            "#1896EF",
+            "#32B82E",
+            "#FDB077",
         ];
     }
 
@@ -108,6 +118,7 @@
         //每个圆形宽度的梯度
         baseParams.circleWGrads = (baseParams.circleMaxW - baseParams.circleMinW)/ baseParams.circleMaxNum;
         baseParams.circleWList = getCircleWList();
+        baseParams.circleHList = getCircleHList();
         baseParams.circleColorList = getCircleColorList();
         baseParams.topPartPadding = 40;
         baseParams.topPartH = baseParams.circleH * 5 + 2*baseParams.topPartPadding;
@@ -198,13 +209,13 @@
             topStatusTime.html((timeLong > 0 ? "时间 "+timeLong : '时间到'));
             progress.css("width", baseParams.sw - timeLong/timeMax*baseParams.sw);
             if(timeLong > 5){
-                status_music.html('<audio src="../../sound/success_partial.mp3" controls autoplay hidden="true"></audio>');
+                status_music.html('<audio src="../../sound/tock.mp3" controls autoplay hidden="true"></audio>');
                 progress.css("background", "green");
             }else if(timeLong >= 0 && timeLong <= 5){
                 progress.css("background", "red");
                 //音效的设置
                 if(timeLong == 0){
-                    bg_music.html('<audio src="../../sound/success.mp3" controls autoplay hidden="true"></audio>');
+                    bg_music.html('<audio src="../../sound/swish.mp3" controls autoplay hidden="true"></audio>');
                 }else{
                     bg_music.html('<audio src="../../sound/tick.mp3" controls autoplay hidden="true"></audio>');
                 }
@@ -235,7 +246,15 @@
 
     function getRandomRect() {
         var rectList = [];
-        for(var i=0;i<5;i++){
+        let num = 3;
+        if(gameLevel == 'low'){
+            num = 3;
+        }else if(gameLevel == 'mid'){
+            num = 5;
+        }else{
+            num = GetRandomNum(0, 1) ? 3 : 5;
+        }
+        for(var i=0;i<num;i++){
             rectList[i] ={
               color:baseParams.circleColorList[GetRandomNum(0, 4)],
               width:baseParams.circleWList[GetRandomNum(0, 4)],
@@ -246,7 +265,7 @@
 
     function drawRect() {
         var canvas = topPart.get(0).getContext('2d');//注意当用jquery的时候这里需要加get(0)
-        canvas.font="16px Arial";
+        canvas.font="12px Microsoft YaHei";
         canvas.fillStyle="#4d4d4d";
         canvas.fillText("请找出匹配的视图",10,20);
         topPartConvas = canvas;
@@ -256,11 +275,14 @@
         canvas.shadowColor = 'rgba(0, 0, 0, 0.5)'; // 颜色
         var rectList = getRandomRect();
         baseParams.rectList = rectList;
+        var totalH = 0;
         for(var i=0;i<rectList.length;i++){
+            var height = baseParams.circleHList[gameLevel=='dif'?GetRandomNum(0, baseParams.circleHList.length - 1): (baseParams.circleHList.length - 1)];
+            totalH = height + totalH + 2;
             canvas.fillStyle = rectList[i].color;
             var x = baseParams.sw / 2 - rectList[i].width / 2;
-            var y = baseParams.topPartH - baseParams.topPartPadding - i*baseParams.circleH;
-            canvas.fillRect(x,y,rectList[i].width,baseParams.circleH);
+            var y = baseParams.topPartH - baseParams.topPartPadding - totalH;
+            canvas.fillRect(x,y,rectList[i].width, height);
         }
     }
 
@@ -274,9 +296,9 @@
         canvas.shadowOffsetY = 0; // 阴影X轴偏移
         canvas.shadowBlur = 0; // 模糊尺寸
         canvas.shadowColor = 'rgba(0, 0, 0, 0)'; // 颜色
-        canvas.font="16px Arial";
+        canvas.font="12px Microsoft YaHei";
         canvas.fillStyle="#4d4d4d";
-        canvas.fillText("请点击选择",10,20);
+        canvas.fillText("请点击选择",10,10);
         centerPartConvas = canvas;
         canvas.shadowOffsetX = 1; // 阴影Y轴偏移
         canvas.shadowOffsetY = 1; // 阴影X轴偏移
