@@ -143,6 +143,9 @@
             }
         });
         centerPart.click(function (event) {
+            if(gameStatus != 'playing'){
+                return;
+            }
             var circleMainAll = baseParams.mainCircles;
             var circleOther1All = baseParams.circleOther1All;
             var circleOther2All = baseParams.circleOther2All;
@@ -243,6 +246,9 @@
 
     function drawRect() {
         var canvas = topPart.get(0).getContext('2d');//注意当用jquery的时候这里需要加get(0)
+        canvas.font="16px Arial";
+        canvas.fillStyle="#4d4d4d";
+        canvas.fillText("请找出匹配的视图",10,20);
         topPartConvas = canvas;
         canvas.shadowOffsetX = 1; // 阴影Y轴偏移
         canvas.shadowOffsetY = 1; // 阴影X轴偏移
@@ -263,6 +269,14 @@
         var y = circleAll.centerY;;
         var circles = circleAll.circles;
         var canvas = centerPart.get(0).getContext('2d');//注意当用jquery的时候这里需要加get(0)
+        canvas.shadowBlur = 0; // 模糊尺寸
+        canvas.shadowOffsetX = 0; // 阴影Y轴偏移
+        canvas.shadowOffsetY = 0; // 阴影X轴偏移
+        canvas.shadowBlur = 0; // 模糊尺寸
+        canvas.shadowColor = 'rgba(0, 0, 0, 0)'; // 颜色
+        canvas.font="16px Arial";
+        canvas.fillStyle="#4d4d4d";
+        canvas.fillText("请点击选择",10,20);
         centerPartConvas = canvas;
         canvas.shadowOffsetX = 1; // 阴影Y轴偏移
         canvas.shadowOffsetY = 1; // 阴影X轴偏移
